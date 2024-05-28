@@ -8,6 +8,7 @@ mkdir grading-area
 git clone $1 student-submission
 echo 'Finished cloning'
 
+set +e
 # Draw a picture/take notes on the directory structure that's set up after
 # getting to this point
 
@@ -29,7 +30,6 @@ cp -r lib grading-area
 cd grading-area
 javac -cp $CPATH *.java
 
-echo "The exit code for the compile step is $?"
 if [[ $? -ne 0 ]]
 then
     echo "There is an error in the code. Grading ended"
@@ -40,14 +40,23 @@ else
 fi
 
 java -cp $CPATH org.junit.runner.JUnitCore TestListExamples > grade-results.txt
-echo "The exit code for the compile step is $?"
 
 
 if [[ $? -ne 0 ]]
 then
-    echo `grep "Failures" grading-area/grade-results.txt`
-    exit
+    grep "Failures" grade-results.txt
+    echo "Grade: 0"
+
 else
     echo "Grade: 100"
+    exit
 fi
+
+if [[ `grep -c "testMergeRight" grade-results.txt` -ne 0 ]]
+then
+    echo "Try to check your edge cases! Add tests!"
+fi
+
+
+
 
